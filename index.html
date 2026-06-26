@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#000000" />
+  <title>Double Touch For Surprise</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Nunito:wght@600;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      background: #000;
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* ─── SCREEN 1: PURE BLACK LANDING ─── */
+    #landing {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+      z-index: 10;
+      transition: opacity 0.8s ease;
+      cursor: pointer;
+    }
+
+    #landing.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .landing-text {
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: clamp(22px, 6.5vw, 40px);
+      color: #fff;
+      text-align: center;
+      letter-spacing: 0.04em;
+      line-height: 1.4;
+      padding: 0 32px;
+      animation: softPulse 3s ease-in-out infinite;
+    }
+
+    @keyframes softPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    /* ripple on tap */
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+      width: 80px;
+      height: 80px;
+      transform: scale(0);
+      animation: rippleOut 0.5s ease-out forwards;
+      pointer-events: none;
+    }
+
+    @keyframes rippleOut {
+      to { transform: scale(8); opacity: 0; }
+    }
+
+    /* ─── SCREEN 2: CAKE ─── */
+    #cake-screen {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      overflow-y: auto;
+      overflow-x: hidden;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.7s ease 0.4s;
+      padding-bottom: 40px;
+    }
+
+    #cake-screen.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    /* ─── CAKE CONTAINER ─── */
+    .cake-container {
+      position: relative;
+      width: 100%;
+      max-width: 520px;
+      margin: 0 auto;
+      flex-shrink: 0;
+    }
+
+    .cake-img {
+      width: 100%;
+      height: auto;
+      display: block;
+      opacity: 0;
+      animation: fadeIn 0.8s ease 1s forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    /* ─── TEXT ON CAKE (like birthday writing) ─── */
+    .cake-text-overlay {
+      position: absolute;
+      /* sit on the top surface of the cake — roughly upper-center of the image */
+      top: 12%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 72%;
+      text-align: center;
+      pointer-events: none;
+      opacity: 0;
+      animation: textAppear 0.7s ease 1.7s forwards;
+    }
+
+    @keyframes textAppear {
+      from { opacity: 0; transform: translateX(-50%) scale(0.85); }
+      to   { opacity: 1; transform: translateX(-50%) scale(1); }
+    }
+
+    .cake-writing {
+      font-family: 'Dancing Script', cursive;
+      font-size: clamp(18px, 5.5vw, 34px);
+      color: #fff;
+      text-shadow:
+        0 0 8px rgba(255,255,255,0.6),
+        0 2px 6px rgba(0,0,0,0.9),
+        0 0 20px rgba(255,220,180,0.4);
+      line-height: 1.45;
+      display: block;
+      letter-spacing: 0.02em;
+    }
+
+    /* ─── BOTTOM MESSAGE ─── */
+    .bottom-msg {
+      width: 100%;
+      max-width: 520px;
+      padding: 22px 28px 10px;
+      text-align: center;
+      opacity: 0;
+      animation: slideUp 0.6s ease 2.3s forwards;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .msg-line {
+      font-size: clamp(14px, 4vw, 18px);
+      color: #ddd;
+      line-height: 1.75;
+      font-weight: 600;
+    }
+
+    .msg-line span {
+      color: #fff;
+      font-weight: 800;
+    }
+
+    .choc-line {
+      margin-top: 18px;
+      font-size: clamp(15px, 4.2vw, 19px);
+      color: #C68642;
+      font-weight: 800;
+      font-family: 'Nunito', sans-serif;
+      letter-spacing: 0.01em;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SCREEN 1: BLACK WITH TEXT ONLY -->
+  <div id="landing">
+    <p class="landing-text">Double Touch<br>For Surprise</p>
+  </div>
+
+  <!-- SCREEN 2: REAL CAKE PHOTO + MESSAGE -->
+  <div id="cake-screen">
+
+    <div class="cake-container">
+      <img class="cake-img" src="cake.png" alt="Chocolate Cake" />
+
+      <!-- Writing on the cake like a birthday message -->
+      <div class="cake-text-overlay">
+        <span class="cake-writing">SORRY I SLEPT</span>
+        <span class="cake-writing">WITHOUT TELLIN YOU 😭</span>
+      </div>
+    </div>
+
+    <div class="bottom-msg">
+      <p class="msg-line">
+        Won't happen ever again. <span>Promise.</span><br>
+        Wishing you a speedy recovery for your hands 🙏<br>
+      </p>
+      <p class="choc-line">You were craving chocolate cake right????? 🍫</p>
+    </div>
+
+  </div>
+
+  <script>
+    const landing = document.getElementById('landing');
+    const cakeScreen = document.getElementById('cake-screen');
+    let lastTap = 0;
+
+    function createRipple(x, y) {
+      const r = document.createElement('div');
+      r.className = 'ripple';
+      r.style.left = (x - 40) + 'px';
+      r.style.top  = (y - 40) + 'px';
+      landing.appendChild(r);
+      setTimeout(() => r.remove(), 600);
+    }
+
+    function reveal() {
+      landing.classList.add('hidden');
+      cakeScreen.classList.add('visible');
+    }
+
+    function handleTap(x, y) {
+      const now = Date.now();
+      createRipple(x, y);
+      if (now - lastTap < 380) {
+        reveal();
+      }
+      lastTap = now;
+    }
+
+    landing.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      const t = e.touches[0];
+      handleTap(t.clientX, t.clientY);
+    }, { passive: false });
+
+    landing.addEventListener('click', (e) => {
+      handleTap(e.clientX, e.clientY);
+    });
+
+    landing.addEventListener('dblclick', reveal);
+  </script>
+</body>
+</html>
